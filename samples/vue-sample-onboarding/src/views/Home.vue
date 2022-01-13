@@ -1,6 +1,6 @@
 <template>
   <div class="home">
-    <HomePage msg="Sample Onboarding App" />
+    <HomePage name="Carol" />
   </div>
 </template>
 

@@ -1,16 +1,15 @@
 <template>
   <div class="hello">
-    <h1>{{ msg }}</h1>
+    <h1 v-if="isSignedIn">Welcome {{ name }}.</h1>
     <mgt-msal2-provider
       client-id="e25e74ba-7d3e-4a5f-bb6b-ac1ca12742f2"
       redirect-uri="http://localhost:8080"
-      scopes="user.read,people.read,user.readbasic.all,contacts.read,calendars.read,files.read,group.read.all,tasks.readwrite"
+      scopes="user.read,people.read,user.readbasic.all,
+      contacts.read,calendars.read,files.read,group.read.all,tasks.readwrite"
     >
     </mgt-msal2-provider>
 
-    <header>
-      <h1>My Organizer</h1>
-      <p>Sign-in to get started organizing your work and life.</p>
+    <header v-if="!isSignedIn">
       <mgt-login v-pre>
         <template data-type="signed-out">
           <div>Sign In</div>
@@ -27,7 +26,22 @@ import { ProviderState, Providers } from '@microsoft/mgt';
 export default defineComponent({
   name: 'HomePage',
   props: {
-    msg: String,
+    name: String,
+  },
+  data() {
+    return {
+      isSignedIn: false,
+    };
+  },
+  created() {
+    const provider = Providers.globalProvider;
+    if (provider && provider.state === ProviderState.SignedIn) {
+      this.isSignedIn = true;
+      provider.onStateChanged(this.isSignedIn);
+    };
+  },
+  methods: {
+
   },
 });
 </script>
