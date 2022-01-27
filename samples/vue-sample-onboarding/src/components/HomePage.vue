@@ -1,112 +1,128 @@
 <template>
-  <div class="hello">
-    <h1 v-if="signedIn">Welcome {{ name }}.</h1>
-    <mgt-msal2-provider
-      client-id="e25e74ba-7d3e-4a5f-bb6b-ac1ca12742f2"
-      redirect-uri="http://localhost:8080"
-      scopes="user.read,people.read,user.readbasic.all,
-      contacts.read,calendars.read,files.read,group.read.all,tasks.readwrite"
-    >
-    </mgt-msal2-provider>
-
-    <header v-if="!signedIn">
-      <mgt-login v-pre>
-        <template data-type="signed-out">
-          <div>Sign In</div>
-        </template>
-      </mgt-login>
-    </header>
-    <div id="sidePanel" v-if="signedIn">
-      <div id="profile">
-        <mgt-person person-query="me" view="twoLines" line2-property="jobTitle"> </mgt-person>
-        <a href="#" @click="logout()">Sign Out</a>
-      </div>
-
+  <div class="wrapper">
+    <div class="people-header">
+      <h2>
+        Hello,
+        <mgt-person person-query="me" v-pre>
+          <template>
+            <div>{{ person.displayName }}! 🤗</div>
+          </template>
+        </mgt-person>
+      </h2>
+      <h2>Meet the team</h2>
       <mgt-people v-pre>
         <template>
-          <ul>
+          <ul class="people-list">
             <li data-for="person in people">
-              <mgt-person person-query="{{ person.userPrincipalName }}"></mgt-person>
-              <h3>{{ person.displayName }}</h3>
-              <p>{{ person.jobTitle }}</p>
-              <p>{{ person.department }}</p>
+              <mgt-person person-query="{{ person.userPrincipalName }}"
+              person-card="hover" show-presence></mgt-person>
             </li>
           </ul>
         </template>
       </mgt-people>
     </div>
 
-    <h2 id="agendaHeader">Agenda</h2>
-    <mgt-agenda class="mgt-dark" group-by-day="true"></mgt-agenda>
-
-    <h2 id="tasksHeader">Tasks</h2>
-    <mgt-tasks data-source="todo" read-only="true"></mgt-tasks>
-
-    <h2 id="filesHeader">Files</h2>
-    <mgt-file-list max-upload-file="5" enable-file-upload></mgt-file-list>
+    <div class="agenda-header">
+      <h2>Your Upcoming Events</h2>
+      <mgt-agenda class="mgt-dark" group-by-day="true"></mgt-agenda>
+    </div>
+    <div class="files-header">
+      <h2>Your Shared Files</h2>
+      <mgt-file-list max-upload-file="5" enable-file-upload></mgt-file-list>
+    </div>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { ProviderState, Providers, MgtPerson } from '@microsoft/mgt';
 
 export default defineComponent({
   name: 'HomePage',
-  props: {
-    name: String,
-  },
-  data() {
-    return {
-      signedIn: false,
-      details: {},
-    };
-  },
-  created() {
-    const provider = Providers.globalProvider;
-    if (provider) {
-      this.loggedIn(provider.state);
-      provider.onStateChanged(this.loggedIn);
-    }
-
-    Providers.onProviderUpdated(() => {
-      const provider2 = Providers.globalProvider;
-      if (provider2) {
-        this.loggedIn(provider2.state);
-        provider2.onStateChanged(this.loggedIn);
-      }
-    });
-  },
-  methods: {
-    loggedIn(state: any) {
-      if (state === ProviderState.SignedIn) {
-        this.signedIn = true;
-      }
-    },
-    loggedOut() {
-      this.signedIn = false;
-    },
-    setDetails() {
-      this.details = (this.$refs.user as MgtPerson).personDetails;
-    },
-  },
 });
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
-h3 {
-  margin: 40px 0 0;
+*, *:before, *:after {
+  box-sizing: border-box;
 }
-ul {
-  list-style-type: none;
-  padding: 0;
+
+body {
+  margin: 40px;
+  font-family: "Circular-Bold", sans-serif;
+  background-color: #fff;
+  color: #444;
 }
-li {
+
+h2, p {
+  margin: 0 0 1em 0;
+  font-size: 20px;
+  font-weight: bold;
+}
+li mgt-person {
+    --avatar-size: 80px;
+  }
+
+.wrapper {
+  max-width: 940px;
+  margin: 0 20px;
+  display: grid;
+  grid-gap: 10px;
+}
+ul.people-list {
+  list-style: none;
+}
+ul.people-list li {
   display: inline-block;
-  margin: 0 10px;
+  padding: 0 0.5rem;
 }
-a {
-  color: #42b983;
+mgt-agenda {
+--agenda-header-color: black;
+--agenda-header-font-size: 20px;
+
 }
+@media screen and (min-width: 500px) {
+
+  /* no grid support? */
+  .files-header {
+    float: left;
+    width: auto;
+  }
+
+  .agenda-header {
+    float: right;
+    width: auto;
+  }
+
+  .wrapper {
+    margin: 0 auto;
+    grid-template-columns: 3fr 1fr;
+  }
+
+  .people-header {
+    grid-column: 1 / -1;
+    /* needed for the floated layout */
+    clear: both;
+  }
+
+}
+
+.wrapper > * {
+  background-color: #fff;
+  color: #000;
+  border-radius: 5px;
+  border-color: #444;
+  padding: 20px;
+  /* needed for the floated layout*/
+  margin-bottom: 10px;
+}
+
+/* We need to set the widths used on floated items back to auto,
+ and remove the bottom margin as when we have grid we have gaps. */
+// @supports (display: grid) {
+//   .wrapper > * {
+//     width: auto;
+//     margin: 0;
+//   }
+// }
 </style>

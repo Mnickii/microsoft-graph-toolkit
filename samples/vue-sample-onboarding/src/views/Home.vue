@@ -1,6 +1,6 @@
 <template>
   <div class="home">
-    <HomePage name="Carol" />
+    <HomePage />
   </div>
 </template>
 
@@ -15,3 +15,10 @@ export default defineComponent({
   },
 });
 </script>
+<style scoped lang="scss">
+h2, p {
+  margin: 0 0 1em 0;
+  font-size: 20px;
+  font-weight: bold;
+}
+</style>
